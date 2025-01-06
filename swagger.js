@@ -10,7 +10,7 @@ const options = {
     },
     servers: [
       {
-        url: `http://localhost:${process.env.PORT || 8000}`,
+        url: `https://keen-sheba-asim-1b80dbd7.koyeb.app`,
         description: "Local server",
       },
     ],
