@@ -19,7 +19,7 @@ const router = express.Router();
  *     tags:
  *       - Products
  *     security:
- *       - bearerAuth: []  # Token ki zarurat yahan specify ki gayi hai
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -96,5 +96,62 @@ router.get("/getproduct", getAllproduct);
  *         description: Product not found
  */
 router.get("/getsingleproduct/:id", getSingleproduct);
+
+/**
+ * @swagger
+ * /product/updateproduct/{id}:
+ *   put:
+ *     summary: Update a product by ID
+ *     tags:
+ *       - Products
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               description:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Product updated successfully
+ *       404:
+ *         description: Product not found
+ */
+router.put("/updateproduct/:id", updateProduct);
+
+/**
+ * @swagger
+ * /product/deleteproduct/{id}:
+ *   delete:
+ *     summary: Delete a product by ID
+ *     tags:
+ *       - Products
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product ID
+ *     responses:
+ *       200:
+ *         description: Product deleted successfully
+ *       404:
+ *         description: Product not found
+ */
+router.delete("/deleteproduct/:id", deleteProduct);
 
 export default router;
