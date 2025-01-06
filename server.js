@@ -15,6 +15,7 @@ import swaggerSpec from "./swagger.js";
 dotenv.config();
 
 const app = express();
+const port = process.env.PORT || 3000;
 
 app.use(
   cors({
@@ -33,9 +34,9 @@ app.use("/order", orderroutes);
 
 connectDb()
   .then(() => {
-    app.listen(process.env.PORT, () => {
-      console.log(`Server is running on port ${process.env.PORT}`);
-      console.log(`Swagger Docs available at http://localhost:${process.env.PORT}/api-docs`);
+    app.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
+      console.log(`Swagger Docs available at http://localhost:${port}/api-docs`);
     });
   })
   .catch((err) => {
