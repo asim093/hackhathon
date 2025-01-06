@@ -1,0 +1,44 @@
+import express from "express";
+import dotenv from "dotenv";
+import userroutes from "./src/routes/UserRoutes.js";
+import courseroutes from "./src/routes/Course.Routes.js";
+import studentroutes from "./src/routes/Student.Routes.js";
+import productroutes from "./src/routes/Product.Routes.js";
+import orderroutes from "./src/routes/Order.Routes.js";
+import connectDb from "./src/db/index.js";
+import cors from "cors";
+
+// Swagger imports
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./swagger.js";
+
+dotenv.config();
+
+const app = express();
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+  })
+);
+
+app.use(express.json());
+
+// Add Swagger documentation route
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+app.use("/auth", userroutes);
+app.use("/product", productroutes);
+app.use("/order", orderroutes);
+
+connectDb()
+  .then(() => {
+    app.listen(process.env.PORT, () => {
+      console.log(`Server is running on port ${process.env.PORT}`);
+      console.log(`Swagger Docs available at http://localhost:${process.env.PORT}/api-docs`);
+    });
+  })
+  .catch((err) => {
+    console.error("Failed to connect to database:", err);
+    process.exit(1);
+  });
