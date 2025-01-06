@@ -27,8 +27,12 @@ app.use(
 );
 
 app.use(express.json());
+// server.js mein
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "Welcome to the Ecommerce API!" });
+});
 
-// Add Swagger documentation route
+
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use("/auth", userroutes);
