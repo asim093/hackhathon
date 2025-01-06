@@ -19,7 +19,10 @@ const port = process.env.PORT || 3000;
 
 app.use(
   cors({
-    origin: "https://keen-sheba-asim-1b80dbd7.koyeb.app/",
+    origin: [
+      "http://localhost:5173",  // Local development URL
+      "https://keen-sheba-asim-1b80dbd7.koyeb.app",  // Koyeb production URL
+    ],
   })
 );
 
