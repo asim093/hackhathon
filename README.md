@@ -13,10 +13,9 @@
   <h2>Setup and Installation</h2>
   <ol>
     <li><strong>Clone the repository</strong>:
-      <pre>git clone &lt;(https://github.com/asim093/hackhathon.git)&gt;</pre>
+      <pre>git clone &lt;https://github.com/asim093/hackhathon.git&gt;</pre>
     </li>
     <li><strong>Install dependencies</strong>:
-      <pre>cd &lt;project-directory&gt;</pre>
       <pre>npm install</pre>
     </li>
     <li><strong>Environment Variables</strong>:
