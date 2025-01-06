@@ -13,7 +13,7 @@
   <h2>Setup and Installation</h2>
   <ol>
     <li><strong>Clone the repository</strong>:
-      <pre>git clone &lt;your-repo-url&gt;</pre>
+      <pre>git clone &lt;(https://github.com/asim093/hackhathon.git)&gt;</pre>
     </li>
     <li><strong>Install dependencies</strong>:
       <pre>cd &lt;project-directory&gt;</pre>
