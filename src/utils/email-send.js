@@ -1,17 +1,19 @@
-import { transporter } from "../config/mail-config.js";
-import dotenv from "dotenv";
-dotenv.config();
-
 async function sendMail({ email = [], subject = "", htmlTemplate = "" }) {
-    const info = await transporter.sendMail({
+    try {
+      const info = await transporter.sendMail({
         from: process.env.EMAIL_FROM,
-        to: email.join(", "),
+        to: email.join(", "), 
         subject,
         html: htmlTemplate,
-    });
-
-    return info;
-}
-
-
-export default sendMail;
+      });
+  
+      console.log("Email Sent Successfully:", info.messageId);
+      return info;
+    } catch (error) {
+      console.error("Email Sending Failed:", error.message);
+      throw new Error("Failed to send email");
+    }
+  }
+  
+  export default sendMail;
+  

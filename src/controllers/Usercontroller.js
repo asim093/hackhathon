@@ -8,9 +8,10 @@ export const Signup = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
+    // Check if all required fields are provided
     if (!username || !email || !password) {
       return res.status(400).json({
-        message: "Please fill all required fields (name, email, password).",
+        message: "Please fill all required fields (username, email, password).",
       });
     }
 
@@ -21,24 +22,30 @@ export const Signup = async (req, res) => {
         .json({ message: "User with this email already exists." });
     }
 
+    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Create a new user in the database
     const newUser = await Usermodle.create({
       username,
       email,
       password: hashedPassword,
     });
 
+    // Send a welcome email to the new user
     try {
-      const mailResponse = await sendMail({
+      await sendMail({
         email: [email],
         subject: `Welcome ${username} to Our Website`,
-        htmlTemplate: `Hello ${username}, you have successfully signed up on our website!`,
+        htmlTemplate: `
+          <h1>Welcome to Our Website</h1>
+          <p>Hello <strong>${username}</strong>,</p>
+          <p>Thank you for signing up on our website. We're excited to have you onboard!</p>
+        `,
       });
-
-    
+      console.log("Welcome email sent successfully.");
     } catch (mailError) {
-      console.error("Email sending failed:", mailError);
+      console.error("Failed to send welcome email:", mailError.message);
     }
 
     // Generate JWT token
@@ -46,26 +53,26 @@ export const Signup = async (req, res) => {
     const token = jwt.sign(
       payload,
       process.env.JWT_SECRET_KEY || "defaultsecret",
-      {
-        expiresIn: "1h",
-      }
+      { expiresIn: "1h" }
     );
 
+    // Add the token to the user and save it
     newUser.token = token;
     await newUser.save();
 
+    // Respond with success
     return res.status(201).json({
       message: "User signup successful",
       token,
       user: {
         id: newUser._id,
-        name: newUser.name,
+        username: newUser.username,
         email: newUser.email,
       },
     });
   } catch (error) {
     console.error("Signup controller error:", error.message);
-    res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
