@@ -132,6 +132,7 @@ router.get("/getsingleproduct/:id", getSingleproduct);
  */
 router.put("/updateproduct/:id", updateProduct);
 
+
 /**
  * @swagger
  * /product/deleteproduct/{id}:
@@ -153,5 +154,6 @@ router.put("/updateproduct/:id", updateProduct);
  *         description: Product not found
  */
 router.delete("/deleteproduct/:id", deleteProduct);
+
 
 export default router;

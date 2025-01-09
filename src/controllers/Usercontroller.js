@@ -29,16 +29,23 @@ export const Signup = async (req, res) => {
       password: hashedPassword,
     });
 
-    const mailResponse = await sendMail({
-      email: [email],
-      subject: `Welcome ${username} to Our Website`,
-      htmlTemplate: `Hello ${username}, you have successfully signed up on our website!`,
-    });
+    // Send welcome email
+    try {
+      const mailResponse = await sendMail({
+        email: [email],
+        subject: `Welcome ${username} to Our Website`,
+        htmlTemplate: `Hello ${username}, you have successfully signed up on our website!`,
+      });
 
-    if (!mailResponse.accepted.length) {
-      return res.status(500).json({ message: "Failed to send email" });
+      if (!mailResponse.accepted.length) {
+        return res.status(500).json({ message: "Failed to send email" });
+      }
+    } catch (mailError) {
+      console.error("Email sending failed:", mailError);
+      return res.status(500).json({ message: "Failed to send welcome email" });
     }
 
+    // Generate JWT token
     const payload = { user: { id: newUser._id } };
     const token = jwt.sign(
       payload,
@@ -51,14 +58,13 @@ export const Signup = async (req, res) => {
     newUser.token = token;
     await newUser.save();
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "User signup successful",
       token,
       user: {
         id: newUser._id,
         name: newUser.name,
         email: newUser.email,
-        password: newUser.password,
       },
     });
   } catch (error) {
@@ -104,8 +110,8 @@ export const Login = async (req, res) => {
 export const getAllUser = async (req, res) => {
   try {
     const users = await Usermodle.find({})
-      .populate('products')  // Populating the 'products' field
-      .populate('order');   // Populating the 'orders' field
+      .populate("products") // Populating the 'products' field
+      .populate("order"); // Populating the 'orders' field
 
     res.json(users);
   } catch (error) {
@@ -113,8 +119,6 @@ export const getAllUser = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
-
 
 export const logout = async (req, res) => {
   try {
