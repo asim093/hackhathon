@@ -29,7 +29,6 @@ export const Signup = async (req, res) => {
       password: hashedPassword,
     });
 
-    // Send welcome email
     try {
       const mailResponse = await sendMail({
         email: [email],
@@ -37,9 +36,7 @@ export const Signup = async (req, res) => {
         htmlTemplate: `Hello ${username}, you have successfully signed up on our website!`,
       });
 
-      if (!mailResponse.accepted.length) {
-        return res.status(500).json({ message: "Failed to send email" });
-      }
+    
     } catch (mailError) {
       console.error("Email sending failed:", mailError);
       return res.status(500).json({ message: "Failed to send welcome email" });
