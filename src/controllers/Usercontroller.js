@@ -39,7 +39,6 @@ export const Signup = async (req, res) => {
     
     } catch (mailError) {
       console.error("Email sending failed:", mailError);
-      return res.status(500).json({ message: "Failed to send welcome email" });
     }
 
     // Generate JWT token
