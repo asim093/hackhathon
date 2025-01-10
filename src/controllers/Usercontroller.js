@@ -8,7 +8,6 @@ export const Signup = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // Check if all required fields are provided
     if (!username || !email || !password) {
       return res.status(400).json({
         message: "Please fill all required fields (username, email, password).",
@@ -22,17 +21,14 @@ export const Signup = async (req, res) => {
         .json({ message: "User with this email already exists." });
     }
 
-    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create a new user in the database
     const newUser = await Usermodle.create({
       username,
       email,
       password: hashedPassword,
     });
 
-    // Send a welcome email to the new user
     try {
       await sendMail({
         email: [email],
@@ -48,7 +44,6 @@ export const Signup = async (req, res) => {
       console.error("Failed to send welcome email:", mailError.message);
     }
 
-    // Generate JWT token
     const payload = { user: { id: newUser._id } };
     const token = jwt.sign(
       payload,
@@ -56,11 +51,9 @@ export const Signup = async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    // Add the token to the user and save it
     newUser.token = token;
     await newUser.save();
 
-    // Respond with success
     return res.status(201).json({
       message: "User signup successful",
       token,

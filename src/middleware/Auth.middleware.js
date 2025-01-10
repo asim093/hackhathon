@@ -25,4 +25,16 @@ const authMiddleware = async (req, res, next) => {
 };
 
 
+// const adminmiddleware = async (req , res , next) => {
+//   if (!req.user?.role === 'admin') {
+//     return res
+//      .status(403)
+//      .json({ message: "You are not authorized to perform this action", status: "failed" });
+//   }
+//   next();
+  
+// }
+
+
+
 export default authMiddleware;

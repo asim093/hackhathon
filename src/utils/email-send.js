@@ -1,3 +1,5 @@
+import { transporter } from "../config/mail-config.js";
+
 async function sendMail({ email = [], subject = "", htmlTemplate = "" }) {
     try {
       const info = await transporter.sendMail({
