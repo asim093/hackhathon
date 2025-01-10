@@ -10,7 +10,7 @@ const options = {
     },
     servers: [
       {
-        url: `https://keen-sheba-asim-1b80dbd7.koyeb.app`,
+        url: `https://ministerial-inger-asim-3f191a31.koyeb.app/`,
         description: "Local server",
       },
     ],
