@@ -1,20 +1,26 @@
 import express from "express";
-import { forgotPassword, Login, resetPassword, Signup, verifyOtp, getAllUser } from "../controllers/Usercontroller.js";
+import {
+  forgotPassword,
+  Login,
+  resetPassword,
+  Signup,
+  verifyOtp,
+  getAllUser,
+} from "../controllers/Usercontroller.js";
 import upload from "../middleware/Multer.middleware.js";
-
 
 const router = express.Router();
 
 /**
  * @swagger
  * /auth/Signup:
- *   post:
+ *    post:
  *     summary: User registration
- *     description: Registers a new user with username, email, and password
+ *     description: Registers a new user with username, email, password, and profile image
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -27,13 +33,16 @@ const router = express.Router();
  *               password:
  *                 type: string
  *                 example: password123
+ *               profileimage:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       201:
  *         description: User successfully registered
  *       400:
  *         description: Bad request
  */
-router.post("/Signup", upload.single("profileimage") ,  Signup);
+router.post("/Signup", upload.single("profileimage"), Signup);
 
 /**
  * @swagger
