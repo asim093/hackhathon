@@ -1,5 +1,7 @@
 import express from "express";
 import { forgotPassword, Login, resetPassword, Signup, verifyOtp, getAllUser } from "../controllers/Usercontroller.js";
+import upload from "../middleware/Multer.middleware.js";
+
 
 const router = express.Router();
 
@@ -31,7 +33,7 @@ const router = express.Router();
  *       400:
  *         description: Bad request
  */
-router.post("/Signup", Signup);
+router.post("/Signup", upload.single("profileimage") ,  Signup);
 
 /**
  * @swagger

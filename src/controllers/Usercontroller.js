@@ -14,19 +14,25 @@ export const Signup = async (req, res) => {
       });
     }
 
+
     const existingUser = await Usermodle.findOne({ email });
     if (existingUser) {
       return res
         .status(400)
         .json({ message: "User with this email already exists." });
     }
+    if (!req.file.path) {
+      return res.status(400).json({ message: "No profile image provided." });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const profileImagePath = req.file.path;
 
     const newUser = await Usermodle.create({
       username,
       email,
       password: hashedPassword,
+      profileimage: profileImagePath,
     });
 
     try {
@@ -56,12 +62,7 @@ export const Signup = async (req, res) => {
 
     return res.status(201).json({
       message: "User signup successful",
-      token,
-      user: {
-        id: newUser._id,
-        username: newUser.username,
-        email: newUser.email,
-      },
+      newUser
     });
   } catch (error) {
     console.error("Signup controller error:", error.message);
