@@ -1,7 +1,14 @@
 import { OrderModel } from "../Models/Order.model.js";
 import { Usermodle } from "../Models/User.model.js";
 import { productmodel } from "../Models/Product.model.js";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+dotenv.config();
+import Stripe from "stripe";
 
+const stripe = new Stripe(
+  "sk_test_51QhkNeRTTxMNN0bCIDXjxyfs3GeQRSrP16hBdjUdDoKxg3SPASbOMwkF9ZUKTrAQCejotQw1anpafZr8uh6Q2KAc00CjkTMsfk"
+);
 export const Createorder = async (req, res) => {
   try {
     const { userId, products } = req.body;
@@ -11,35 +18,87 @@ export const Createorder = async (req, res) => {
     }
 
     let totalAmount = 0;
-    for (const item of products) {
-      const product = await productmodel.findById(item.product);
-      if (!product) {
-        return res
-          .status(404)
-          .json({ error: `Product not found: ${item.product}` });
-      }
-      totalAmount += product.price * item.quantity;
+    const productsdata = await Promise.all(
+      products.map(async (item) => {
+        const product = await productmodel.findById(item.product).exec();
+        if (!product) {
+          throw new Error(`Product not found: ${item.product}`);
+        }
+        if (!product.name || !product.price || !product.image) {
+          throw new Error(
+            `Product is missing required fields: ${item.product}`
+          );
+        }
+
+        totalAmount += product.price * (item.quantity || 1);
+        return {
+          ...product._doc,
+          quantity: item.quantity || 1,
+        };
+      })
+    );
+
+    const mongoSession = await mongoose.startSession();
+    mongoSession.startTransaction();
+
+    try {
+      // Create the order in MongoDB
+      const newOrder = new OrderModel({
+        user: userId,
+        products: productsdata.map((p) => ({
+          product: p._id,
+          quantity: p.quantity,
+        })),
+        totalAmount,
+      });
+      const savedOrder = await newOrder.save({ session: mongoSession });
+
+      // Update user with the new order
+      await Usermodle.findByIdAndUpdate(
+        userId,
+        { $push: { order: savedOrder._id } },
+        { session: mongoSession }
+      );
+
+      await mongoSession.commitTransaction();
+      mongoSession.endSession();
+
+      // Create Stripe session
+      const lineItems = productsdata.map((p) => ({
+        price_data: {
+          currency: "PKR",
+          product_data: {
+            name: p.name,
+            images: [p.image],
+          },
+          unit_amount: Math.round(p.price * 100),
+        },
+        quantity: p.quantity,
+      }));
+
+      const stripeSession = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: lineItems,
+        mode: "payment",
+        success_url: "http://localhost:5173/Success",
+        cancel_url: "http://localhost:5173/Cancel",
+      });
+
+      console.log(stripeSession.id); 
+
+      res.status(201).json({
+        message: "Order created successfully",
+        order: savedOrder,
+        sessionId: stripeSession.id,
+      });
+    } catch (err) {
+      await mongoSession.abortTransaction();
+      mongoSession.endSession();
+      throw err;
     }
-
-    const order = new OrderModel({
-      user: userId,
-      products,
-      totalAmount,
-    });
-
-    const savedOrder = await order.save();
-
-    const user = await Usermodle.findById(userId);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    user.order.push(savedOrder._id);
-    await user.save();
-    res.status(201).json({ message: "Order created successfully", order });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Server error" });
+    console.error(error.message);
+    res.status(500).json({ error: error.message || "Server error" });
   }
 };
 
@@ -73,3 +132,5 @@ export const getsingleorder = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+

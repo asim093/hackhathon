@@ -1,16 +1,22 @@
+import { Categorymodel } from "../Models/Category.model.js";
 import { productmodel } from "../Models/Product.model.js";
 import { Usermodle } from "../Models/User.model.js";
 
 export const CreateProduct = async (req, res) => {
   try {
-    const { name, description, price, userid } = req.body;
+    const { name, description, price, userid, Categoryname } = req.body;
 
-    if (!name || !description || !price || !userid) {
+    if (!name || !description || !price || !userid || !Categoryname) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
     if (!req.file) {
       return res.status(400).json({ error: "No image provided" });
+    }
+
+    const category = await Categorymodel.findOne({ name: Categoryname });
+    if (!category) {
+      return res.status(404).json({ error: "Category not found" });
     }
 
     const product = new productmodel({
@@ -19,9 +25,13 @@ export const CreateProduct = async (req, res) => {
       price,
       image: req.file.path,
       userid,
+      category: category._id, 
     });
 
     await product.save();
+
+    category.products.push(product._id);
+    await category.save();
 
     const user = await Usermodle.findById(userid);
     if (!user) {
@@ -29,7 +39,7 @@ export const CreateProduct = async (req, res) => {
     }
     user.products.push(product._id);
     await user.save();
-    
+
     res.status(201).json({ message: "Product created successfully", product });
   } catch (error) {
     console.error(error);
@@ -37,9 +47,12 @@ export const CreateProduct = async (req, res) => {
   }
 };
 
+
 export const getSingleproduct = async (req, res) => {
   try {
-    const product = await productmodel.findById(req.params.id);
+    const product = await productmodel
+      .findById(req.params.id)
+      .populate("reviews");
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
@@ -56,7 +69,11 @@ export const getAllproduct = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const products = await productmodel.find({}).skip(skip).limit(limit);
+    const products = await productmodel
+      .find({})
+      .skip(skip)
+      .limit(limit)
+      .populate("reviews");
 
     res.json({
       message: "Products fetched successfully",
@@ -96,7 +113,7 @@ export const deleteProduct = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const product = await productmodel.findByIdAndDelete(id); 
+    const product = await productmodel.findByIdAndDelete(id);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -105,4 +122,3 @@ export const deleteProduct = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
-

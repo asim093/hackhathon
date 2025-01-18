@@ -5,6 +5,8 @@ import courseroutes from "./src/routes/Course.Routes.js";
 import studentroutes from "./src/routes/Student.Routes.js";
 import productroutes from "./src/routes/Product.Routes.js";
 import orderroutes from "./src/routes/Order.Routes.js";
+import ReviewRoutes from './src/routes/Review.Routes.js'
+import categoryRoutes from "./src/routes/CategoryRoutes.js"
 import connectDb from "./src/db/index.js";
 import cors from "cors";
 
@@ -36,6 +38,8 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/auth", userroutes);
 app.use("/product", productroutes);
 app.use("/order", orderroutes);
+app.use("/review", ReviewRoutes );
+app.use("/category", categoryRoutes );
 
 connectDb()
   .then(() => {
