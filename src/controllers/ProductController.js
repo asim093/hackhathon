@@ -14,9 +14,14 @@ export const CreateProduct = async (req, res) => {
       return res.status(400).json({ error: "No image provided" });
     }
 
-    const category = await Categorymodel.findOne({ name: Categoryname });
+    const category = await Categorymodel.name.findOne({ name: Categoryname });
     if (!category) {
       return res.status(404).json({ error: "Category not found" });
+    }
+
+    const user = await Usermodle.findById(userid);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
 
     const product = new productmodel({
@@ -25,7 +30,7 @@ export const CreateProduct = async (req, res) => {
       price,
       image: req.file.path,
       userid,
-      category: category._id, 
+      category: category._id,
     });
 
     await product.save();
@@ -33,20 +38,15 @@ export const CreateProduct = async (req, res) => {
     category.products.push(product._id);
     await category.save();
 
-    const user = await Usermodle.findById(userid);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
     user.products.push(product._id);
     await user.save();
 
     res.status(201).json({ message: "Product created successfully", product });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Server Error" });
+    console.error("Error in CreateProduct:", error.message);
+    res.status(500).json({ error: "Server Error", details: error.message });
   }
 };
-
 
 export const getSingleproduct = async (req, res) => {
   try {
@@ -67,24 +67,38 @@ export const getAllproduct = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+
+    if (page <= 0 || limit <= 0) {
+      return res.status(400).json({ error: "Invalid page or limit value" });
+    }
+
     const skip = (page - 1) * limit;
 
+    const total = await productmodel.countDocuments({});
     const products = await productmodel
       .find({})
       .skip(skip)
       .limit(limit)
-      .populate("reviews");
+      .populate("reviews").populate("userid" , "name" , "profileimage")
+      .populate("category", "name")
+      .exec();
+
+    if (products.length === 0) {
+      return res.status(404).json({ message: "No products found" });
+    }
 
     res.json({
       message: "Products fetched successfully",
       data: products,
       length: products.length,
+      total,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Server Error" });
+    console.error("Error fetching products:", error.message);
+    res.status(500).json({ error: "Server Error", details: error.message });
   }
 };
+
 
 export const updateProduct = async (req, res) => {
   try {
