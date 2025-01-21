@@ -79,7 +79,13 @@ export const getAllproduct = async (req, res) => {
       .find({})
       .skip(skip)
       .limit(limit)
-      .populate("reviews").populate("userid")
+      .populate({
+        path: "reviews",
+        populate: {
+          path: "userid", 
+          model: "User", 
+        },
+      })
       .populate("category", "name")
       .exec();
 
@@ -98,7 +104,6 @@ export const getAllproduct = async (req, res) => {
     res.status(500).json({ error: "Server Error", details: error.message });
   }
 };
-
 
 export const updateProduct = async (req, res) => {
   try {
