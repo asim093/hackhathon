@@ -79,7 +79,7 @@ export const getAllproduct = async (req, res) => {
       .find({})
       .skip(skip)
       .limit(limit)
-      .populate("reviews").populate("userid" , "name" , "profileimage")
+      .populate("reviews").populate("userid")
       .populate("category", "name")
       .exec();
 
