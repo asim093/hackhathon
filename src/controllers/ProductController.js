@@ -52,7 +52,13 @@ export const getSingleproduct = async (req, res) => {
   try {
     const product = await productmodel
       .findById(req.params.id)
-      .populate("reviews");
+      .populate({
+        path: "reviews",
+        populate: {
+          path: "userid", 
+          model: "User", 
+        },
+      }).exec();
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
